@@ -1,8 +1,24 @@
-/*
+table.automations-list {
+    width: 100%;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 5px;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+table.automations-list th {
+    text-align: left;
+}
 
-If your plugin does not need CSS, delete this file.
+table.automations-list tbody tr {
+    font-size: 0.8em;
+    border-top: solid;
+}
 
-*/
+table.automations-list td {
+    text-align: left;
+}
+
+table.automations-list tbody td {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
