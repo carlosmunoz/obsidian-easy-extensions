@@ -19,6 +19,28 @@ Extensions are javascript files that the plugin loads from a specified location.
 }
 ```
 
+If you prefer to write your extensions as classes, this will also work:
+
+```js
+(function() {
+    const Extension = class {
+        constructor() {
+            this.name = "My First Extension";
+            this.description = "A sample extension";
+        }
+
+        onLoad(api) {
+            // loading code goes here
+        }
+
+        onUnload(api) {
+            // unloading code goes here
+        }
+    };
+    return new Extension();
+})();
+```
+
 Before creating an extension, go to the plugin settings and configure the location in your vault where your extensions will be stored.
 
 To create an extension you can call the `Create New Extension` command from the command palette. You should now be able to edit your extension js file. An extension has the following properties:
