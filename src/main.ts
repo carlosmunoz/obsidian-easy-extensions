@@ -1,7 +1,6 @@
 import { App, Modal, Notice, Plugin, TAbstractFile, TFile, TFolder } from 'obsidian';
-import * as path from 'path';
 import { Extension, ExtensionApi } from './extension-api';
-import { ExtensionApiImpl } from "./extension-impl";
+import { ExtensionApiImpl, InternalExtensionWrapper } from "./extension-impl";
 import { Settings, SettingsTab } from './settings';
 
 // Remember to rename these classes and interfaces!
@@ -18,7 +17,7 @@ const DEFAULT_SETTINGS: Settings = {
 export default class ExtensionPlugin extends Plugin {
 	settings: Settings;
 	apiImpl: ExtensionApi = new ExtensionApiImpl(this.app, this);
-	extensions: Extension[] = [];
+	extensions: InternalExtensionWrapper[] = [];
 
 	async onload() {
 		await this.loadSettings();
@@ -114,8 +113,8 @@ export default class ExtensionPlugin extends Plugin {
 				const code = await this.app.vault.read(atmFile);
 				const fn = new Function(`return ${code}`);
 				const extension: Extension = fn();
-				//console.log(automation);
-				this.extensions.push(extension);
+				const intWrapper = new InternalExtensionWrapper(extension, atmFile.path);
+				this.extensions.push(intWrapper);
 
 				console.log("Loaded extension: " + extension.name);
 
@@ -192,11 +191,11 @@ export default class ExtensionPlugin extends Plugin {
 
 				// if the file already exists
 				var idx = 1;
-				while(this.app.vault.getFileByPath(extDir.path + path.sep + extName + '.js')) {
+				while(this.app.vault.getFileByPath(`${extDir.path}/${extName}.js`)) {
 					extName = `${extName}-${idx++}`;
 				}
 
-				const extFile = await this.app.vault.create(extDir.path + path.sep + extName + '.js', extContent);
+				const extFile = await this.app.vault.create(`${extDir.path}/${extName}.js`, extContent);
 				// open the extension file
 				this.app.workspace.getLeaf(true).openFile(extFile);
 			}
@@ -204,12 +203,12 @@ export default class ExtensionPlugin extends Plugin {
 	}
 
 	unloadAllExtensions() {
-		this.extensions.forEach(extension => {
-			if (extension.onUnload) {
+		this.extensions.forEach(extWrapper => {
+			if (extWrapper.instance.onUnload) {
 				try {
-					extension.onUnload(this.apiImpl);	
+					extWrapper.instance.onUnload(this.apiImpl);	
 				} catch (error) {
-					console.error(`Error when unloading extension: ${extension.name}`, error);
+					console.error(`Error when unloading extension: ${extWrapper.instance.name}`, error);
 				}
 			}
 		});
