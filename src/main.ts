@@ -1,8 +1,8 @@
-import { App, CachedMetadata, Command, Editor, EventRef, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TAbstractFile, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
-import { Settings, SettingsTab } from './settings';
-import { Automation, AutomationApi } from './automation-api';
-import { AutomationApiImpl } from "./automation-impl";
+import { App, Modal, Notice, Plugin, TAbstractFile, TFile, TFolder } from 'obsidian';
 import * as path from 'path';
+import { Extension, ExtensionApi } from './extension-api';
+import { ExtensionApiImpl } from "./extension-impl";
+import { Settings, SettingsTab } from './settings';
 
 // Remember to rename these classes and interfaces!
 
@@ -12,19 +12,19 @@ interface MyPluginSettings {
 }
 
 const DEFAULT_SETTINGS: Settings = {
-	automationsFolder: 'Automations'
+	extensionFolder: 'Extensions'
 }
 
-export default class AutomatonPlugin extends Plugin {
+export default class ExtensionPlugin extends Plugin {
 	settings: Settings;
-	apiImpl: AutomationApi = new AutomationApiImpl(this.app, this);
-	automations: Automation[] = [];
+	apiImpl: ExtensionApi = new ExtensionApiImpl(this.app, this);
+	extensions: Extension[] = [];
 
 	async onload() {
 		await this.loadSettings();
 		this.registerReloadCommand();
-		this.registerNewAutomationCommand();
-		await this.scanAndLoadAutomations();
+		this.registerNewExtensionCommand();
+		await this.scanAndLoadExtensions();
 
 		// This creates an icon in the left ribbon.
 		// const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
@@ -88,14 +88,14 @@ export default class AutomatonPlugin extends Plugin {
 		// this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
 
-	async scanAndLoadAutomations() {
-		this.automations = []; // clear out the existing automations
-		const automationsFolder = this.app.vault.getFolderByPath(this.settings.automationsFolder);
-		if (!automationsFolder) {
-			new Notice('Automations folder not found');
+	async scanAndLoadExtensions() {
+		this.extensions = []; // clear out the existing automations
+		const extDir = this.app.vault.getFolderByPath(this.settings.extensionFolder);
+		if (!extDir) {
+			new Notice('Extensions folder not found');
 		}
 		else {
-			const findAutomationFiles = (f: TAbstractFile) => {
+			const findExtensionFiles = (f: TAbstractFile) => {
 				let foundFiles: TFile[] = [];
 				if (f instanceof TFile) {
 					if (f.extension === 'js') {
@@ -104,35 +104,35 @@ export default class AutomatonPlugin extends Plugin {
 				}
 				else if (f instanceof TFolder) {
 					for (const file of f.children) {
-						foundFiles.push(...findAutomationFiles(file));
+						foundFiles.push(...findExtensionFiles(file));
 					}
 				}
 				return foundFiles;
 			};
 
-			for (const atmFile of findAutomationFiles(automationsFolder)) {
+			for (const atmFile of findExtensionFiles(extDir)) {
 				const code = await this.app.vault.read(atmFile);
 				const fn = new Function(`return ${code}`);
-				//console.log(fn());
-				const automation: Automation = fn();
-				this.automations.push(automation);
+				const extension: Extension = fn();
+				//console.log(automation);
+				this.extensions.push(extension);
 
-				console.log("Loaded automation: " + automation.name);
+				console.log("Loaded extension: " + extension.name);
 
 				// Load each automation
 				try {
-					automation.onLoad(this.apiImpl);
+					extension.onLoad(this.apiImpl);
 				}
 				catch (e) {
 					console.error(e);
-					new Notice(`Error loading automation '${automation.name}'. See more in the console.`);
+					new Notice(`Error loading extension '${extension.name}'. See more in the console.`);
 				}
 			}
 		}
 	}
 
 	onunload() {
-		this.unloadAllAutomations();
+		this.unloadAllExtensions();
 	}
 
 	// async reloadPlugin() {
@@ -158,58 +158,58 @@ export default class AutomatonPlugin extends Plugin {
 			id: "reload-automations",
 			name: "Reload Automations",
 			callback: async () => {
-				this.unloadAllAutomations();
-				await this.scanAndLoadAutomations();
+				this.unloadAllExtensions();
+				await this.scanAndLoadExtensions();
 				new Notice("Automations have been reloaded");
 			}
 		});
 	}
 
-	private registerNewAutomationCommand() {
+	private registerNewExtensionCommand() {
 		this.addCommand({
-			id: "new-automation",
-			name: "Create New Automation",
+			id: "new-extension",
+			name: "Create New Extension",
 			callback: async () => {
-				const automationsFolder = this.app.vault.getFolderByPath(this.settings.automationsFolder);
-				if (!automationsFolder) {
-					new Notice('Automations folder not found');
+				const extDir = this.app.vault.getFolderByPath(this.settings.extensionFolder);
+				if (!extDir) {
+					new Notice('Extensions folder not found');
 					return;
 				}
 
-				var atmName = `new-automation`;
-				const atmDesc = 'Brand new automation';
-				const atmContent = `{
-    name: "New Automation",
-    description: "${atmDesc}",
+				var extName = `New Extension`;
+				const extDesc = 'Brand new extension';
+				const extContent = `{
+    name: "${extName}",
+    description: "${extDesc}",
     onLoad: (api) => {
-        api.showNotice("Loaded Automation");
+        api.showNotice("Loaded Extension");
     },
     onUnload: (api) => {
-        api.showNotice("Unloaded Automation");
+        api.showNotice("Unloaded Extension");
     }
 }
 				`;
 
 				// if the file already exists
 				var idx = 1;
-				while(this.app.vault.getFileByPath(automationsFolder.path + path.sep + atmName + '.js')) {
-					atmName = `${atmName}-${idx++}`;
+				while(this.app.vault.getFileByPath(extDir.path + path.sep + extName + '.js')) {
+					extName = `${extName}-${idx++}`;
 				}
 
-				const atmFile = await this.app.vault.create(automationsFolder.path + path.sep + atmName + '.js', atmContent);
-				// open the automation file
-				this.app.workspace.getLeaf(true).openFile(atmFile);
+				const extFile = await this.app.vault.create(extDir.path + path.sep + extName + '.js', extContent);
+				// open the extension file
+				this.app.workspace.getLeaf(true).openFile(extFile);
 			}
 		});
 	}
 
-	unloadAllAutomations() {
-		this.automations.forEach(automation => {
-			if (automation.onUnload) {
+	unloadAllExtensions() {
+		this.extensions.forEach(extension => {
+			if (extension.onUnload) {
 				try {
-					automation.onUnload(this.apiImpl);	
+					extension.onUnload(this.apiImpl);	
 				} catch (error) {
-					console.error(`Error when unloading automation: ${automation.name}`, error);
+					console.error(`Error when unloading extension: ${extension.name}`, error);
 				}
 			}
 		});

@@ -1,11 +1,11 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import AutomatonPlugin from "src/main";
+import ExtensionPlugin from "src/main";
 
 export class SettingsTab extends PluginSettingTab {
 
-    plugin: AutomatonPlugin;
+    plugin: ExtensionPlugin;
     
-    constructor(app: App, plugin: AutomatonPlugin) {
+    constructor(app: App, plugin: ExtensionPlugin) {
         super(app, plugin);
         this.plugin = plugin;
     }
@@ -16,51 +16,39 @@ export class SettingsTab extends PluginSettingTab {
         containerEl.empty();
 
         new Setting(containerEl)
-            .setName('Automations Folder')
-            .setDesc('Folder where automations are stored')
+            .setName('Extensions Folder')
+            .setDesc('Folder where extensions are stored')
             .addText(text => text
-                .setPlaceholder('Automations')
-                .setValue(this.plugin.settings.automationsFolder)
+                .setPlaceholder('extensions')
+                .setValue(this.plugin.settings.extensionFolder)
                 .onChange(async (value) => {
-                    this.plugin.settings.automationsFolder = value;
+                    this.plugin.settings.extensionFolder = value;
                     await this.plugin.saveSettings();
                 })
             );
 
-        const headerNames = ['Name', 'Description', 'Active'];
-
         new Setting(containerEl)
-            .setName("Refresh Automations")
+            .setName("Refresh Extensions")
             .addButton((button) =>
                 button
                     .setIcon('refresh-ccw')
                     .onClick(async () => {
-                        this.plugin.unloadAllAutomations();
-                        await this.plugin.scanAndLoadAutomations();
+                        this.plugin.unloadAllExtensions();
+                        await this.plugin.scanAndLoadExtensions();
                     })
             );
 
-        new Setting(containerEl)
-            .setName("Registered Automations")
-            .setDesc("Shows a list of all registered automations. Reload the plugin or run the Reload automations command from the palette in case there are any missing.")
-        const automationsList = containerEl.createEl('div');
-        const table = automationsList.createEl('table', { cls: 'automations-list' });
-        const thead = table.createEl('thead');
-        const tbody = table.createEl('tbody');
-        const tr = thead.createEl('tr');
-        headerNames.forEach(headerName => {
-            tr.createEl('th', { text: headerName });
-        });
-        this.plugin.automations.forEach(automation => {
-            const tr = tbody.createEl('tr');
-            tr.createEl('td', { text: automation.name });
-            tr.createEl('td', { text: automation.description });
-            tr.createEl('td', { text: 'Yes' });
+        containerEl.createEl('h1', { text: 'Registered Extensions' });
+
+        this.plugin.extensions.forEach(extension => {
+            new Setting(containerEl)
+                .setName(extension.name)
+                .setDesc(extension.description || '')
         });
     }
 
 }
 
 export interface Settings {
-    automationsFolder: string;
+    extensionFolder: string;
 }

@@ -1,11 +1,11 @@
 import { App } from "obsidian";
-import { AutomationApi } from "./automation-api";
-import AutomatonPlugin from "./main";
+import { ExtensionApi } from "./extension-api";
+import ExtensionPlugin from "./main";
 
 
-export class AutomationApiImpl implements AutomationApi {
+export class ExtensionApiImpl implements ExtensionApi {
 
-    constructor(public app: App, public plugin: AutomatonPlugin) {
+    constructor(public app: App, public plugin: ExtensionPlugin) {
     }
 
     getPlugin(identifier: string) {
