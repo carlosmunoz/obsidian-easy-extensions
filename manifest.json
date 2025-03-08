@@ -1,11 +1,11 @@
 {
-	"id": "automaton",
-	"name": "Automaton",
+	"id": "easy-extensions",
+	"name": "Easy Extensions",
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "Automaton is a plugin for Obsidian that allows you to automate your vault in several ways.",
+	"description": "Easy Extensions is a plugin for Obsidian that allows to extend Obsidian functionality without needing to create custom plugins.",
 	"author": "Carlos Muñoz",
-	"authorUrl": "https://obsidian.md",
+	"authorUrl": "https://github.com/carlosmunoz",
 	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": false
 }
