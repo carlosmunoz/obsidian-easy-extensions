@@ -1,5 +1,5 @@
 import { App } from "obsidian";
-import { ExtensionApi } from "./extension-api";
+import { Extension, ExtensionApi } from "./extension-api";
 import ExtensionPlugin from "./main";
 
 
@@ -31,5 +31,12 @@ export class ExtensionApiImpl implements ExtensionApi {
                 throw error; // Re-throw the error unless handled
             }
         }) as T;
+    }
+}
+
+export class InternalExtensionWrapper {
+    constructor(
+        public readonly instance: Extension, 
+        public readonly filePath: string) {
     }
 }
