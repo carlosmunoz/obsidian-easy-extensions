@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { AbstractInputSuggest, App, PluginSettingTab, Setting } from "obsidian";
 import ExtensionPlugin from "src/main";
 
 export class SettingsTab extends PluginSettingTab {
@@ -18,14 +18,17 @@ export class SettingsTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName('Extensions Folder')
             .setDesc('Folder where extensions are stored')
-            .addText(text => text
-                .setPlaceholder('extensions')
-                .setValue(this.plugin.settings.extensionFolder)
-                .onChange(async (value) => {
-                    this.plugin.settings.extensionFolder = value;
-                    await this.plugin.saveSettings();
-                })
-            );
+            .addSearch(search => {
+                search.setPlaceholder('extensions')
+                    .setValue(this.plugin.settings.extensionFolder)
+                    .onChange(async (value) => {
+                        new FolderSuggest(this.app, search.inputEl).open();
+                        this.plugin.settings.extensionFolder = value;
+                        await this.plugin.saveSettings();
+                    });
+
+                new FolderSuggest(this.app, search.inputEl);
+            });
 
         new Setting(containerEl)
             .setName("Refresh Extensions")
@@ -35,15 +38,20 @@ export class SettingsTab extends PluginSettingTab {
                     .onClick(async () => {
                         this.plugin.unloadAllExtensions();
                         await this.plugin.scanAndLoadExtensions();
+                        this.display();
                     })
             );
 
-        containerEl.createEl('h1', { text: 'Registered Extensions' });
+        new Setting(containerEl).setName('Registered Extensions').setHeading();
 
-        this.plugin.extensions.forEach(extension => {
+        this.plugin.extensions.forEach(extWrapper => {
             new Setting(containerEl)
-                .setName(extension.name)
-                .setDesc(extension.description || '')
+                .setName(extWrapper.instance.name)
+                .setDesc(createFragment(fragment => {
+                    fragment.appendText((extWrapper.instance.description || '' ));
+                    fragment.createEl('br');
+                    fragment.appendText(`File: ${extWrapper.filePath}`);
+                }));
         });
     }
 
@@ -51,4 +59,32 @@ export class SettingsTab extends PluginSettingTab {
 
 export interface Settings {
     extensionFolder: string;
+}
+
+class FolderSuggest extends AbstractInputSuggest<string> {
+
+    private folders: string[];
+    private inputEl: HTMLInputElement;
+
+    constructor(app: App, inputEl: HTMLInputElement) {
+        super(app, inputEl);
+        this.inputEl = inputEl;
+        this.folders = app.vault.getAllFolders().map(f => f.path);
+    }
+
+    protected getSuggestions(query: string): string[] | Promise<string[]> {
+        return this.folders
+            .filter(p => p.toLowerCase().startsWith(query.toLowerCase()));
+    }
+
+    renderSuggestion(value: string, el: HTMLElement): void {
+        el.setText(value);
+    }
+
+    selectSuggestion(value: string, evt: MouseEvent | KeyboardEvent): void {
+        super.selectSuggestion(value, evt);
+        this.inputEl.value = value;
+        this.inputEl.dispatchEvent(new Event("input"));
+        this.close();
+    }
 }
