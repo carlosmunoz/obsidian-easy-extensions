@@ -54,7 +54,58 @@ To create an extension you can call the `Create New Extension` command from the 
 
 ## API
 
-The Extension API is a single, convenient way to access obsidian objects like `App` and the Extension plugin itself. It's aim is also to offer simple methods and access to other types (e.g. Notice) to your custom extensions.
+The Extension API is a single, convenient way to access obsidian objects like `App` and the Extension plugin itself. It's aim is also to offer simple methods and access to other obsidian utility types (e.g. Notice) to your custom extensions.
+
+For example, to create a notice using the obsidian API during the `onLoad` function you can do something like:
+
+```js
+onLoad: (api) => {
+    new api.Notice("This is a notice!");
+}
+```
+
+### Commands
+You can also register new commands using the obsidian plugin API; you need to do it by accessing the plugin from the API itself:
+
+```js
+onLoad: (api) => {
+    api.plugin.addCommand({
+        id: 'command-id',
+        name: 'Execute some command',
+        callback: () => {
+            new api.Notice("Command executed!");
+        }
+    });
+}
+```
+
+Always remember to remove any commands your extension adds in the `onUnload` method. Otherwise the commands will linger even if the extension is removed. They can still be removed by reloading or uninstalling the plugin, but extensions should be self-contained and clean after themselves.
+
+```js
+onUnload: (api) => {
+    api.plugin.removeCommand('command-id');
+}
+```
+
+TODO: Link to the Obsidian command api reference
+
+### Events
+
+Similarly, extensions can register new events using the API and they must also ensure the events are turned off when unloading.
+
+```js
+onLoad: (api) => {
+    // create and register an event
+    this.renameEvt = api.app.vault.on('rename', async (file, oldPath) => {
+        console.log('Renaming a file');
+    })
+    api.plugin.registerEvent(this.renameEvt);
+},
+onUnload: (api) => {
+    // turn the event off when unloading
+    api.app.vault.offref(this.renameEvt);
+}
+```
 
 ## Installation
 
