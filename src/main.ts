@@ -88,7 +88,7 @@ export default class ExtensionPlugin extends Plugin {
 	}
 
 	async scanAndLoadExtensions() {
-		this.extensions = []; // clear out the existing automations
+		this.extensions = []; // clear out the existing extensions
 		const extDir = this.app.vault.getFolderByPath(this.settings.extensionFolder);
 		if (!extDir) {
 			new Notice('Extensions folder not found');
@@ -118,7 +118,7 @@ export default class ExtensionPlugin extends Plugin {
 
 				console.log("Loaded extension: " + extension.name);
 
-				// Load each automation
+				// Load each extension
 				try {
 					extension.onLoad(this.apiImpl);
 				}
@@ -154,8 +154,8 @@ export default class ExtensionPlugin extends Plugin {
 
 	private registerReloadCommand() {
 		this.addCommand({
-			id: "reload-automations",
-			name: "Reload Automations",
+			id: "reload-extensions",
+			name: "Reload all extensions",
 			callback: async () => {
 				this.unloadAllExtensions();
 				await this.scanAndLoadExtensions();
