@@ -134,24 +134,6 @@ export default class ExtensionPlugin extends Plugin {
 		this.unloadAllExtensions();
 	}
 
-	// async reloadPlugin() {
-	// 	const pluginId = this.manifest.id;
-
-	// 	// Type assertion to access plugins safely
-    //     const plugins = (this.app as any).plugins;
-    //     if (!plugins || !plugins.disablePlugin || !plugins.enablePlugin) {
-    //         console.error("Plugin management API not found.");
-    //         return;
-    //     }
-
-	// 	await plugins.disablePlugin(pluginId);
-	// 	// Wait a bit to ensure unloading is complete
-    //     setTimeout(async () => {
-    //         // Re-enable the plugin
-    //         await plugins.enablePlugin(pluginId);
-    //     }, 500);
-	// }
-
 	private registerReloadCommand() {
 		this.addCommand({
 			id: "reload-extensions",
