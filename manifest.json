@@ -3,9 +3,8 @@
 	"name": "Easy Extensions",
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "Easy Extensions is a plugin for Obsidian that allows to extend Obsidian functionality without needing to create custom plugins.",
+	"description": "Easy Extensions is a plugin for Obsidian that allows to extend its functionality without needing to create custom plugins.",
 	"author": "Carlos Muñoz",
 	"authorUrl": "https://github.com/carlosmunoz",
-	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": false
 }

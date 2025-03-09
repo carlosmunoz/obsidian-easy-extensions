@@ -109,7 +109,7 @@ onUnload: (api) => {
 
 ## Installation
 
-
+This plugin is currently not available via the official Obsidian plugin repository. 
 
 ### Manual Installation
 
