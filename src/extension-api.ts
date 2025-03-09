@@ -1,9 +1,10 @@
-import { App } from "obsidian";
+import { App, Notice } from "obsidian";
 import ExtensionPlugin from "./main";
 
 export interface ExtensionApi {
     app: App;
-    plugin: ExtensionPlugin
+    plugin: ExtensionPlugin;
+    Notice: typeof Notice;
     getPlugin(identifier: string): any;
 }
 
