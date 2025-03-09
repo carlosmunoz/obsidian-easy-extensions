@@ -87,7 +87,7 @@ onUnload: (api) => {
 }
 ```
 
-TODO: Link to the Obsidian command api reference
+Reference: [Obsidian Developer Documentation](https://docs.obsidian.md/Home)
 
 ### Events
 
