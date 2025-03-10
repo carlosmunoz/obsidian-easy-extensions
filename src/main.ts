@@ -3,13 +3,6 @@ import { Extension, ExtensionApi } from './extension-api';
 import { ExtensionApiImpl, InternalExtensionWrapper } from "./extension-impl";
 import { Settings, SettingsTab } from './settings';
 
-// Remember to rename these classes and interfaces!
-
-// REMOVE
-interface MyPluginSettings {
-	mySetting: string;
-}
-
 const DEFAULT_SETTINGS: Settings = {
 	extensionFolder: 'Extensions'
 }
@@ -157,7 +150,7 @@ export default class ExtensionPlugin extends Plugin {
 					return;
 				}
 
-				var extName = `New Extension`;
+				let extName = `New Extension`;
 				const extDesc = 'Brand new extension';
 				const extContent = `{
     name: "${extName}",
@@ -172,7 +165,7 @@ export default class ExtensionPlugin extends Plugin {
 				`;
 
 				// if the file already exists
-				var idx = 1;
+				let idx = 1;
 				while(this.app.vault.getFileByPath(`${extDir.path}/${extName}.js`)) {
 					extName = `${extName}-${idx++}`;
 				}
@@ -202,21 +195,5 @@ export default class ExtensionPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-	}
-}
-
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
 	}
 }
