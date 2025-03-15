@@ -1,6 +1,6 @@
 import { App, Notice } from "obsidian";
 import { Extension, ExtensionApi } from "./extension-api";
-import ExtensionPlugin from "./main";
+import EasyExtensionsPlugin from "./main";
 
 
 export class ExtensionApiImpl implements ExtensionApi {
@@ -8,7 +8,7 @@ export class ExtensionApiImpl implements ExtensionApi {
     // additional exposures from the obsidian API
     Notice: typeof Notice = Notice;
 
-    constructor(public app: App, public plugin: ExtensionPlugin) {
+    constructor(public app: App, public plugin: EasyExtensionsPlugin) {
     }
 
     getPlugin(identifier: string) {

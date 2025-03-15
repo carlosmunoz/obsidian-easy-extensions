@@ -1,11 +1,11 @@
 import { AbstractInputSuggest, App, PluginSettingTab, Setting } from "obsidian";
-import ExtensionPlugin from "src/main";
+import EasyExtensionsPlugin from "src/main";
 
 export class SettingsTab extends PluginSettingTab {
 
-    plugin: ExtensionPlugin;
+    plugin: EasyExtensionsPlugin;
     
-    constructor(app: App, plugin: ExtensionPlugin) {
+    constructor(app: App, plugin: EasyExtensionsPlugin) {
         super(app, plugin);
         this.plugin = plugin;
     }

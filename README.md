@@ -7,38 +7,21 @@ The Easy extensions plugin provides a way to extend Obsidian's functionality wit
 Extensions are javascript files that the plugin loads from a specified location. A basic extension looks like this:
 
 ```js
-{
-    name: "My First Extension",
-    description: "A sample extension",
-    onLoad: (api) => {
-        // loading code goes here
-    },
-    onUnload: (api) => {
-        // unloading code goes here
-    }
-}
-```
+name = "My First Extension";
+description = "A sample extension";
 
-If you prefer to write your extensions as classes, this will also work:
+settings = {
+    setting1: "value",
+    setting2: "value2"
+};
 
-```js
-(function() {
-    const Extension = class {
-        constructor() {
-            this.name = "My First Extension";
-            this.description = "A sample extension";
-        }
+onLoad = (api, settings) => {
+    // loading code goes here
+};
 
-        onLoad(api) {
-            // loading code goes here
-        }
-
-        onUnload(api) {
-            // unloading code goes here
-        }
-    };
-    return new Extension();
-})();
+onUnload = (api, settings) => {
+    // unloading code goes here
+};
 ```
 
 Before creating an extension, go to the plugin settings and configure the location in your vault where your extensions will be stored.
@@ -50,7 +33,8 @@ To create an extension you can call the `Create New Extension` command from the 
 |name  |No        |Unique name for the extension|
 |description|Yes|Something to help you be reminded of the purpose of the extension|
 |onLoad|No |Function that takes a single parameter (the extension API) and may return true or false indicating successful execution. This function will be invoked every time the extension is loaded. |
-|OnUnload|Yes|Similar function to onLoad that will be invoked every time the extension is unloaded. Every command, event, etc that is registered in the onLoad function must be deregistered in the onUnload function.
+|OnUnload|Yes|Similar function to onLoad that will be invoked every time the extension is unloaded. Every command, event, etc that is registered in the onLoad function must be deregistered in the onUnload function.|
+|settings|Yes|An object with all configuration settings needed for the extension to work|
 
 ## API
 
@@ -68,7 +52,7 @@ onLoad: (api) => {
 You can also register new commands using the obsidian plugin API; you need to do it by accessing the plugin from the API itself:
 
 ```js
-onLoad: (api) => {
+onLoad: (api, settings) => {
     api.plugin.addCommand({
         id: 'command-id',
         name: 'Execute some command',
@@ -82,7 +66,7 @@ onLoad: (api) => {
 Always remember to remove any commands your extension adds in the `onUnload` method. Otherwise the commands will linger even if the extension is removed. They can still be removed by reloading or uninstalling the plugin, but extensions should be self-contained and clean after themselves.
 
 ```js
-onUnload: (api) => {
+onUnload: (api, settings) => {
     api.plugin.removeCommand('command-id');
 }
 ```
@@ -94,14 +78,14 @@ Reference: [Obsidian Developer Documentation](https://docs.obsidian.md/Home)
 Similarly, extensions can register new events using the API and they must also ensure the events are turned off when unloading.
 
 ```js
-onLoad: (api) => {
+onLoad: (api, settings) => {
     // create and register an event
     this.renameEvt = api.app.vault.on('rename', async (file, oldPath) => {
         console.log('Renaming a file');
     })
     api.plugin.registerEvent(this.renameEvt);
 },
-onUnload: (api) => {
+onUnload: (api, settings) => {
     // turn the event off when unloading
     api.app.vault.offref(this.renameEvt);
 }

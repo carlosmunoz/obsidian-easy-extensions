@@ -7,7 +7,7 @@ const DEFAULT_SETTINGS: Settings = {
 	extensionFolder: 'Extensions'
 }
 
-export default class ExtensionPlugin extends Plugin {
+export default class EasyExtensionsPlugin extends Plugin {
 	settings: Settings;
 	apiImpl: ExtensionApi = new ExtensionApiImpl(this.app, this);
 	extensions: InternalExtensionWrapper[] = [];
@@ -104,16 +104,16 @@ export default class ExtensionPlugin extends Plugin {
 
 			for (const atmFile of findExtensionFiles(extDir)) {
 				const code = await this.app.vault.read(atmFile);
-				const fn = new Function(`return ${code}`);
-				const extension: Extension = fn();
+				const extension: Extension = this.loadExtensionFromJsCode(code) as Extension;
 				const intWrapper = new InternalExtensionWrapper(extension, atmFile.path);
 				this.extensions.push(intWrapper);
 
 				console.log("Loaded extension: " + extension.name);
 
 				// Load each extension
+				const settings = extension.settings || {};
 				try {
-					extension.onLoad(this.apiImpl);
+					extension.onLoad(this.apiImpl, settings);
 				}
 				catch (e) {
 					console.error(e);
@@ -121,6 +121,22 @@ export default class ExtensionPlugin extends Plugin {
 				}
 			}
 		}
+	}
+
+	loadExtensionFromJsCode(code: string): Record<string, any> {
+		const loader = new Function(`
+			${code}
+			const exports = {};
+			
+			exports.name = name;
+			exports.description = description;
+			exports.settings = settings;
+			exports.onLoad = onLoad;
+			exports.onUnload = onUnload;
+
+			return exports;
+		`.trim());
+		return loader();
 	}
 
 	onunload() {
@@ -152,21 +168,21 @@ export default class ExtensionPlugin extends Plugin {
 
 				let extName = `New Extension`;
 				const extDesc = 'Brand new extension';
-				const extContent = `{
-    name: "${extName}",
-    description: "${extDesc}",
-    onLoad: (api) => {
-        api.showNotice("Loaded Extension");
-    },
-    onUnload: (api) => {
-        api.showNotice("Unloaded Extension");
-    }
-}
+				const extContent = `
+name = "${extName}";
+description = "${extDesc}";
+settings = [];
+onLoad = (api, settings) => {
+	new api.Notice("Loaded Extension");
+};
+onUnload = (api, settings) => {
+	new api.Notice("Unloaded Extension");
+};
 				`;
 
 				// if the file already exists
 				let idx = 1;
-				while(this.app.vault.getFileByPath(`${extDir.path}/${extName}.js`)) {
+				while (this.app.vault.getFileByPath(`${extDir.path}/${extName}.js`)) {
 					extName = `${extName}-${idx++}`;
 				}
 
@@ -181,7 +197,8 @@ export default class ExtensionPlugin extends Plugin {
 		this.extensions.forEach(extWrapper => {
 			if (extWrapper.instance.onUnload) {
 				try {
-					extWrapper.instance.onUnload(this.apiImpl);	
+					const settings = extWrapper.instance.settings || {};
+					extWrapper.instance.onUnload(this.apiImpl, settings);
 				} catch (error) {
 					console.error(`Error when unloading extension: ${extWrapper.instance.name}`, error);
 				}

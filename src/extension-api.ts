@@ -1,9 +1,9 @@
 import { App, Notice } from "obsidian";
-import ExtensionPlugin from "./main";
+import EasyExtensionsPlugin from "./main";
 
 export interface ExtensionApi {
     app: App;
-    plugin: ExtensionPlugin;
+    plugin: EasyExtensionsPlugin;
     Notice: typeof Notice;
     getPlugin(identifier: string): any;
 }
@@ -11,7 +11,8 @@ export interface ExtensionApi {
 export interface Extension {
     name: string;
     description?: string;
-    onLoad: (api: ExtensionApi) => void;
-    onUnload?: (api: ExtensionApi) => void;
+    settings?: any;
+    onLoad: (api: ExtensionApi, settings?: any) => void;
+    onUnload?: (api: ExtensionApi, settings?: any) => void;
 }
 
