@@ -46,4 +46,12 @@ describe('EasyExtensionsPlugin Test', () => {
         expect(api.showNotice).toHaveBeenCalledTimes(1);
     });
 
+    test('failed extension parsing', () => {
+        const extCode = `
+            Invalid extension code
+        `;
+
+        expect(() => plugin.loadExtensionFromJsCode(extCode, "test.js")).toThrow();
+    });
+
 });
