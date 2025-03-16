@@ -54,10 +54,20 @@ export class SettingsTab extends PluginSettingTab {
                     fragment.createEl('br');
                     fragment.appendText(`Description: ${extWrapper.instance?.description || ''}`);
                     fragment.createEl('br');
-                    fragment.appendText(`Status: ${extWrapper.enabled ? '✅' : '❌'}`);
+                    fragment.appendText(`Status: ${extWrapper.status}`);
                 }))
                 .addToggle(toggle => {
-                    toggle.setValue(extWrapper.enabled);
+                    toggle.setValue(extWrapper.enabled)
+                        .onChange(async (value) => {
+                            if (value) {
+                                const newWrapper = await this.plugin.loadExtension(extWrapper.filePath);
+                                const idx = this.plugin.extensions.indexOf(extWrapper);
+                                this.plugin.extensions[idx] = newWrapper;
+                            } else {
+                                this.plugin.unloadExtension(extWrapper);
+                            }
+                            this.display();
+                        });
                 });
         });
     }

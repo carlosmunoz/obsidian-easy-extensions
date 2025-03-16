@@ -40,6 +40,7 @@ export class ExtensionApiImpl implements ExtensionApi {
 export class InternalExtensionWrapper {
 
     public enabled: boolean = false;
-    public instance: Extension;
+    public instance?: Extension;
     public filePath: string;
+    public status?: string;
 }

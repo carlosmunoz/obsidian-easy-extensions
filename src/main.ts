@@ -44,37 +44,67 @@ export default class EasyExtensionsPlugin extends Plugin {
 				return foundFiles;
 			};
 
-			for (const atmFile of findExtensionFiles(extDir)) {
-				const code = await this.app.vault.read(atmFile);
-				const intWrapper = new InternalExtensionWrapper();
-				intWrapper.filePath = atmFile.path;
-				intWrapper.enabled = false;
-				this.extensions.push(intWrapper);
+			for (const extFile of findExtensionFiles(extDir)) {
+				this.extensions.push(await this.loadExtension(extFile.path));
+			}
+		}
+	}
 
+	async loadExtension(filePath: string): Promise<InternalExtensionWrapper> {
+		const intWrapper = new InternalExtensionWrapper();
+		const extFile = this.app.vault.getFileByPath(filePath);
+		if(extFile) {
+			const code = await this.app.vault.cachedRead(extFile);
+			intWrapper.filePath = extFile.path;
+			intWrapper.enabled = false;
+	
+			try {
+				const extension: Extension = this.loadExtensionFromJsCode(code, extFile.name) as Extension;
+				intWrapper.instance = extension;
+				console.log("Loaded extension: " + extension.name);
+	
 				try {
-					const extension: Extension = this.loadExtensionFromJsCode(code, atmFile.name) as Extension;
-					intWrapper.instance = extension;
-					console.log("Loaded extension: " + extension.name);
-
-					try {
-						// Load each extension
-						const settings = extension.settings || {};
-						extension.onLoad(this.apiImpl, settings);
-						intWrapper.enabled = true;
-					}
-					catch (e) {
-						// this error happens when running the onLoad function from the extension
-						intWrapper.enabled = false;
-						console.error(e);
-						new Notice(`Error loading extension '${extension.name}'. See more in the console.`);
-					}
+					// Load each extension
+					const settings = extension.settings || {};
+					extension.onLoad(this.apiImpl, settings);
+					intWrapper.enabled = true;
+					intWrapper.status = '🟢';
 				}
-				catch (error) {
-					// this error happens when parsing the extension code
+				catch (e) {
+					// this error happens when running the onLoad function from the extension
 					intWrapper.enabled = false;
-					console.error(error);
+					intWrapper.status = '🛑 Error when loading the extension (see console for more details)';
+					console.error(e);
+					new Notice(`Error loading extension '${extension.name}'. See more in the console.`);
 				}
 			}
+			catch (error) {
+				// this error happens when parsing the extension code
+				intWrapper.enabled = false;
+				intWrapper.status = '🛑 Error in the extension javascript file (see console for more details)';
+				console.error(error);
+			}
+		}
+		else {
+			intWrapper.status = 'Extension file not found';
+		}
+		return intWrapper;
+	}
+
+	unloadExtension(extWrapper: InternalExtensionWrapper) {
+		if (extWrapper.enabled && extWrapper.instance?.onUnload) {
+			try {
+				if (extWrapper.instance?.onUnload) {
+					const settings = extWrapper.instance.settings || {};
+					extWrapper.instance.onUnload(this.apiImpl, settings);
+					extWrapper.status = 'Unloaded';
+				}
+			} 
+			catch (error) {
+				console.error(`Error when unloading extension: ${extWrapper.instance.name}`, error);
+				extWrapper.status = '🛑 Error when unloading the extension (see console for more details)';
+			}
+			extWrapper.enabled = false;
 		}
 	}
 
@@ -151,14 +181,7 @@ onUnload = (api, settings) => {
 
 	unloadAllExtensions() {
 		this.extensions.forEach(extWrapper => {
-			if (extWrapper.enabled && extWrapper.instance?.onUnload) {
-				try {
-					const settings = extWrapper.instance.settings || {};
-					extWrapper.instance.onUnload(this.apiImpl, settings);
-				} catch (error) {
-					console.error(`Error when unloading extension: ${extWrapper.instance.name}`, error);
-				}
-			}
+			this.unloadExtension(extWrapper);
 		});
 	}
 
