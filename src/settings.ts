@@ -46,12 +46,19 @@ export class SettingsTab extends PluginSettingTab {
 
         this.plugin.extensions.forEach(extWrapper => {
             new Setting(containerEl)
-                .setName(extWrapper.instance.name)
+                .setName(extWrapper.filePath)
                 .setDesc(createFragment(fragment => {
-                    fragment.appendText((extWrapper.instance.description || '' ));
+                    fragment.createEl('strong').appendText('Extension Info');
                     fragment.createEl('br');
-                    fragment.appendText(`File: ${extWrapper.filePath}`);
-                }));
+                    fragment.appendText(`Name: ${extWrapper.instance?.name || 'Unknown'}`);
+                    fragment.createEl('br');
+                    fragment.appendText(`Description: ${extWrapper.instance?.description || ''}`);
+                    fragment.createEl('br');
+                    fragment.appendText(`Status: ${extWrapper.enabled ? '✅' : '❌'}`);
+                }))
+                .addToggle(toggle => {
+                    toggle.setValue(extWrapper.enabled);
+                });
         });
     }
 

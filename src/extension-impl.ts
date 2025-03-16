@@ -38,8 +38,8 @@ export class ExtensionApiImpl implements ExtensionApi {
 }
 
 export class InternalExtensionWrapper {
-    constructor(
-        public readonly instance: Extension, 
-        public readonly filePath: string) {
-    }
+
+    public enabled: boolean = false;
+    public instance: Extension;
+    public filePath: string;
 }

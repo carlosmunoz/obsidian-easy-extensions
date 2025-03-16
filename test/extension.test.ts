@@ -16,7 +16,7 @@ describe('EasyExtensionsPlugin Test', () => {
             onUnload = (api, settings) => {};
             `;
 
-        const ext = plugin.loadExtensionFromJsCode(extCode);
+        const ext = plugin.loadExtensionFromJsCode(extCode, "test.js");
 
         expect(ext).toBeDefined();
         expect(ext.name).toBe("Test Extension");
@@ -40,7 +40,7 @@ describe('EasyExtensionsPlugin Test', () => {
             };
             `;
         
-        const ext = plugin.loadExtensionFromJsCode(extCode);
+        const ext = plugin.loadExtensionFromJsCode(extCode, "test.js");
 
         ext.onLoad(api, {});
         expect(api.showNotice).toHaveBeenCalledTimes(1);
