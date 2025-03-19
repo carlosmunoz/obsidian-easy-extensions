@@ -144,7 +144,7 @@ export default class EasyExtensionsPlugin extends Plugin {
 	private registerNewExtensionCommand() {
 		this.addCommand({
 			id: "new-extension",
-			name: "Create New Extension",
+			name: "Create new extension",
 			callback: async () => {
 				const extDir = this.app.vault.getFolderByPath(this.settings.extensionFolder);
 				if (!extDir) {
@@ -152,7 +152,7 @@ export default class EasyExtensionsPlugin extends Plugin {
 					return;
 				}
 
-				let extName = `New Extension`;
+				let extName = `New extension`;
 				const extDesc = 'Brand new extension';
 				const extContent = `
 name = "${extName}";

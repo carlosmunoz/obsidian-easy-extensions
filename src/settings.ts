@@ -16,7 +16,7 @@ export class SettingsTab extends PluginSettingTab {
         containerEl.empty();
 
         new Setting(containerEl)
-            .setName('Extensions Folder')
+            .setName('Extensions folder')
             .setDesc('Folder where extensions are stored')
             .addSearch(search => {
                 search.setPlaceholder('extensions')
@@ -31,7 +31,7 @@ export class SettingsTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
-            .setName("Refresh Extensions")
+            .setName("Refresh extensions")
             .addButton((button) =>
                 button
                     .setIcon('refresh-ccw')
@@ -42,13 +42,13 @@ export class SettingsTab extends PluginSettingTab {
                     })
             );
 
-        new Setting(containerEl).setName('Registered Extensions').setHeading();
+        new Setting(containerEl).setName('Registered extensions').setHeading();
 
         this.plugin.extensions.forEach(extWrapper => {
             new Setting(containerEl)
                 .setName(extWrapper.filePath)
                 .setDesc(createFragment(fragment => {
-                    fragment.createEl('strong').appendText('Extension Info');
+                    fragment.createEl('strong').appendText('Extension info');
                     fragment.createEl('br');
                     fragment.appendText(`Name: ${extWrapper.instance?.name || 'Unknown'}`);
                     fragment.createEl('br');
