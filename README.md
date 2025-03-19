@@ -1,5 +1,7 @@
 # Obsidian Easy Extensions Plugin
 
+[![Build Status](https://github.com/carlosmunoz/obsidian-easy-extensions/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/carlosmunoz/obsidian-easy-extensions/actions/workflows/build.yml)
+
 The Easy extensions plugin provides a way to extend Obsidian's functionality without the need to create and install custom plugins. Extensions are javascript objects that live in your vault and can be easily shared with others. The plugin makes the Obsidian APIs available to use, and it also adds its own API to facilitate certain actions.
 
 ## Creating your first extension
